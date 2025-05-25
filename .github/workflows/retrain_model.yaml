@@ -31,6 +31,6 @@ jobs:
 
     - name: Run training script
       run: |
-        python retrain_model.py
+        python retrain_model.py $(cat changed_csv.txt)
 
 
