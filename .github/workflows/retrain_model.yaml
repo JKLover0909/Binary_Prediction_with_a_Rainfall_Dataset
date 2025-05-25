@@ -46,8 +46,8 @@ jobs:
 
     - name: Commit and push retrain log
       run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
+        git config --global user.email "12wuu115@gmail.com"
+        git config --global user.name "JKLover0909"
         git add retrain_log.txt
         git commit -m "Update retrain log [skip ci]" || echo "No changes to commit"
         git push
