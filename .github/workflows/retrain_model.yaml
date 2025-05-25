@@ -1,5 +1,8 @@
 name: Retrain Model
 
+permissions:                           # Cho phép GITHUB_TOKEN push code
+  contents: write
+
 on:
   push:
     paths:
@@ -44,10 +47,29 @@ jobs:
           echo "No CSV files to retrain."
         fi
 
-    - name: Commit and push retrain log and model
+    - name: Commit & push retrain log + model
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}   # map secret -> biến môi trường
+        REPO:    ${{ github.repository }}
+        REF:     ${{ github.ref_name }}
       run: |
+        set -e
         git config --global user.email "12wuu115@gmail.com"
-        git config --global user.name "JKLover0909"
-        git add retrain_log.txt catboost_rainfall_model.cbm
-        git commit -m "Update retrain log and model [skip ci]" || echo "No changes to commit"
-        git push https://$GH_TOKEN@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+        git config --global user.name  "JKLover0909"
+
+        # Thêm file (nếu tồn tại)
+        git add retrain_log.txt catboost_rainfall_model.cbm || true
+
+        # Chỉ commit khi có thay đổi
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+          exit 0
+        fi
+
+        git commit -m "Update retrain log and model [skip ci]"
+
+        # Ẩn token trong log
+        echo "::add-mask::$GH_TOKEN"
+
+        # Dùng x-access-token để tránh hiển thị username trong URL
+        git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" HEAD:"${REF}"
