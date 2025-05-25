@@ -1,0 +1,36 @@
+name: Retrain Model
+
+on:
+  push:
+    paths:
+      - 'data/**'  # Chỉ kích hoạt khi có thay đổi trong thư mục 'data'
+
+jobs:
+  retrain_model:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Get changed CSV files
+      id: changed_csv
+      run: |
+        git fetch origin ${{ github.event.before }}
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^data/.*\.csv$' || true > changed_csv.txt
+
+    - name: Run training script
+      run: |
+        python retrain_model.py
+
+
